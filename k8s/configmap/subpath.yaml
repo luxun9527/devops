@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-cm-config #定义一个cm
+data:
+  nginx.conf: |
+    server {
+        listen 7878;
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+        }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-cm-config-v2 #定义一个cm
+data:
+  nginx-cm-config-v2.ini: |
+    port: 9090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-cm-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-cm
+  template:
+    metadata:
+      labels:
+        app: nginx-cm
+    spec:
+      containers:
+        - name: nginx-cm
+          image: 192.168.2.200:5000/nginx
+          ports:
+            - containerPort: 7878
+          volumeMounts:
+            - name: nginx-cm-config-volume
+              mountPath: /etc/nginx/conf.d/nginx.conf  # 将nginx.conf挂载到指定路径
+              subPath: nginx.conf
+            - name: nginx-cm-config-v2-volume
+              mountPath: /etc/nginx/conf.d/nginx-cm-config-v2.ini  # 将nginx-cm-config-v2.ini挂载到指定路径
+              subPath: nginx-cm-config-v2.ini
+
+      imagePullSecrets:
+        - name: regcred
+      volumes:
+        - name: nginx-cm-config-volume
+          configMap:
+            name: nginx-cm-config
+        - name: nginx-cm-config-v2-volume
+          configMap:
+            name: nginx-cm-config-v2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-cm-service
+spec:
+  type: NodePort
+  ports:
+    - port: 7878
+      targetPort: 7878
+      nodePort: 31009
+  selector:
+    app: nginx-cm
+
+
+#
+#subpath的用法是将多个cm挂载到同一个路径下
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#

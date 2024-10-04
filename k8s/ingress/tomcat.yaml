@@ -1,0 +1,65 @@
+# kubectl apply -f tomcat.yaml
+# cat tomcat.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat
+  namespace: default
+spec:
+  selector:
+    app: tomcat
+    release: canary
+  ports:
+    - name: http
+      targetPort: 8080
+      port: 8080
+    - name: ajp
+      targetPort: 8009
+      port: 8009
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat-deploy
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tomcat
+      release: canary
+  template:
+    metadata:
+      labels:
+        app: tomcat
+        release: canary
+    spec:
+      containers:
+        - name: tomcat
+          image: tomcat:8.5.34-jre8-alpine
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: ajp
+              containerPort: 8009
+---
+# kubectl apply -f ingress-myapp.yaml
+# cat ingress-myapp.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-myapp
+  namespace: default
+spec:
+  ingressClassName: "nginx"
+  rules:
+    - host: tomcat.yzy.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tomcat
+                port:
+                  number: 8080
