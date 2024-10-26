@@ -1,0 +1,113 @@
+# https://hub.docker.com/r/bitnami/kafka
+# https://github.com/bitnami/containers/blob/main/bitnami/kafka/docker-compose-cluster.yml
+
+version: '3'
+
+# 定义通用配置
+x-kafka-common: &kafka-common
+  image: 'docker.1panel.dev/bitnami/kafka:2.8.1'
+  restart: unless-stopped                                          # 指定容器退出后的重启策略为始终重启，但是不考虑在Docker守护进程启动时就已经停止了的容器
+  depends_on:
+    - zookepper
+  links:
+    - zookepper
+x-kafka-common-env: &kafka-common-env
+  KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
+  KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:SASL_PLAINTEXT,CLIENT:SASL_PLAINTEXT
+  # 用于 broker 间通信的 SASL 机制
+  KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+  # 允许使用明文监听，出于安全原因，Bitnami Apache Kafka docker 镜像禁用了 PLAINTEXT 侦听器，但可以通过下面方式开启
+  ALLOW_PLAINTEXT_LISTENER: no
+  KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+  KAFKA_ZOOKEEPER_PROTOCOL: SASL     # 可选值有：PLAINTEXT, SASL, SSL, and SASL_SSL. 默认值: PLAINTEXT
+  KAFKA_ZOOKEEPER_USER: user
+  KAFKA_ZOOKEEPER_PASSWORD: pass123
+  #Inter broker credentials
+  KAFKA_INTER_BROKER_USER: interbrokeruser        # Kafka 内部节点通信的用户名，默认值：user
+  KAFKA_INTER_BROKER_PASSWORD: interbrokerpass    # Kafka 内部节点通信的密码，默认值：bitnami
+  #Client credentials（配置 SASL 认证时，使用下面两个变量来配置用户名和密码）
+  KAFKA_CLIENT_USERS: clientuser1       # 使用 SASL 模式处理客户端通信时创建的用户名，用逗号隔开。
+  KAFKA_CLIENT_PASSWORDS: pass123       # 使用 SASL 模式处理客户端通信时创建的密码，用逗号隔开。
+# 网桥 -> 方便相互通讯
+networks:
+  kafka:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.22.6.0/24"
+
+services:
+  zookepper:
+    image: docker.1panel.dev/bitnami/zookeeper:3.8                   # 原镜像`bitnami/zookeeper:latest`
+    container_name: zookeeper                        # 容器名为'zookeeper-server'
+    restart: unless-stopped                                  # 指定容器退出后的重启策略为始终重启，但是不考虑在Docker守护进程启动时就已经停止了的容器
+    volumes:                                         # 数据卷挂载路径设置,将本机目录映射到容器目录
+      - "/etc/localtime:/etc/localtime"
+      # - "./kafka/zookeeper/conf:/opt/bitnami/zookeeper/conf"
+      - "./kafka/zookeeper/data:/bitnami/zookeeper/data"
+    environment:
+      ZOO_ENABLE_AUTH: yes
+      ZOO_SERVER_USERS: user
+      ZOO_SERVER_PASSWORDS: pass123
+      ZOO_CLIENT_USER: user
+      ZOO_CLIENT_PASSWORD: pass123
+    networks:
+      kafka:
+        ipv4_address: 172.22.6.20
+
+  kafka-1:
+    container_name: kafka-1
+    <<: *kafka-common
+    volumes:
+      - "/etc/localtime:/etc/localtime"
+      - "./kafka/kafka1/data:/bitnami/kafka/data"
+    environment:
+      <<: *kafka-common-env
+      KAFKA_CFG_BROKER_ID: 1
+      KAFKA_CFG_LISTENERS: INTERNAL://0.0.0.0:19092,CLIENT://0.0.0.0:19093
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://192.168.2.159:19092,CLIENT://192.168.2.159:19093
+    ports:
+    - "19092:19092"
+    - "19093:19093"
+    networks:
+      kafka:
+        ipv4_address: 172.22.6.21
+  kafka-2:
+    container_name: kafka-2
+    <<: *kafka-common
+    volumes:
+      - "/etc/localtime:/etc/localtime"
+      - "./kafka/kafka2/data:/bitnami/kafka/data"
+    environment:
+      <<: *kafka-common-env
+      KAFKA_CFG_BROKER_ID: 2
+      KAFKA_CFG_LISTENERS: INTERNAL://0.0.0.0:19094,CLIENT://0.0.0.0:19095
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://192.168.2.159:19094,CLIENT://192.168.2.159:19095
+    ports:
+      - "19094:19094"
+      - "19095:19095"
+    networks:
+      kafka:
+        ipv4_address: 172.22.6.22
+
+  # kafka-map图形化管理工具
+  kafka-map:
+    image: registry.cn-hangzhou.aliyuncs.com/zhengqing/kafka-map     # 原镜像`dushixiang/kafka-map:latest`
+    container_name: kafka-map                                        # 容器名为'kafka-map'
+    restart: unless-stopped                                          # 指定容器退出后的重启策略为始终重启，但是不考虑在Docker守护进程启动时就已经停止了的容器
+    volumes:
+      - "./kafka/kafka-map/data:/usr/local/kafka-map/data"
+    environment:
+      DEFAULT_USERNAME: admin
+      DEFAULT_PASSWORD: 123456
+    ports:                              # 映射端口
+      - "9006:8080"
+    depends_on:                         # 解决容器依赖启动先后问题
+      - kafka-1
+      - kafka-2
+    links:                              # 配置容器互相连接
+      - kafka-1
+      - kafka-2
+    networks:
+      kafka:
+        ipv4_address: 172.22.6.30

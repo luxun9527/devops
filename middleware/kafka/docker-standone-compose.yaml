@@ -15,7 +15,7 @@ services:
     restart: unless-stopped                                  # 指定容器退出后的重启策略为始终重启，但是不考虑在Docker守护进程启动时就已经停止了的容器
     volumes:                                         # 数据卷挂载路径设置,将本机目录映射到容器目录
       - "/etc/localtime:/etc/localtime"
-      - "./kafka/zookeeper/conf:/opt/bitnami/zookeeper/conf"
+      # - "./kafka/zookeeper/conf:/opt/bitnami/zookeeper/conf"
       - "./kafka/zookeeper/data:/bitnami/zookeeper/data"
     environment:
       ZOO_ENABLE_AUTH: yes
@@ -37,11 +37,12 @@ services:
     restart: unless-stopped                                          # 指定容器退出后的重启策略为始终重启，但是不考虑在Docker守护进程启动时就已经停止了的容器
     volumes:                                                 # 数据卷挂载路径设置,将本机目录映射到容器目录
       - "/etc/localtime:/etc/localtime"
-     # - "./kafka/kafka/config:/opt/bitnami/kafka/config"
+      - "./kafka/kafka/config:/opt/bitnami/kafka/config"
       - "./kafka/kafka/data:/bitnami/kafka/data"
     environment:
       # 监听器的 CLIENT 上不要设置 9092，否则日志一直输出下面信息：
       # INFO [SocketServer listenerType=ZK_BROKER, nodeId=1] Failed authentication with /10.0.0.2 (SSL handshake failed)
+      KAFKA_CFG_BROKER_ID: 12
       KAFKA_CFG_LISTENERS: INTERNAL://0.0.0.0:9092,CLIENT://0.0.0.0:9093
       KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://192.168.2.159:9092,CLIENT://192.168.2.159:9093
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
@@ -61,9 +62,10 @@ services:
       #Client credentials（配置 SASL 认证时，使用下面两个变量来配置用户名和密码）
       KAFKA_CLIENT_USERS: clientuser1       # 使用 SASL 模式处理客户端通信时创建的用户名，用逗号隔开。
       KAFKA_CLIENT_PASSWORDS: pass123       # 使用 SASL 模式处理客户端通信时创建的密码，用逗号隔开。
-
+      KAFKA_CFG_LOG_RETENTION_CHECK_INTERVAL_MS: 600000
     depends_on:
       - zookepper
+
   kafka-map:
     image: registry.cn-hangzhou.aliyuncs.com/zhengqing/kafka-map                         # 原镜像`dushixiang/kafka-map:latest`
     container_name: kafka-map                            # 容器名为'kafka-map'
