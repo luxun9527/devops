@@ -1,0 +1,85 @@
+version: '3'
+services:
+
+  redis-node1:  # 服务名
+    image: registry.cn-hangzhou.aliyuncs.com/zhengqing/redis:7.0.5                   # 镜像'redis:7.0.5'
+    container_name: redis-node1 # docker启动的容器名
+    ports:  # 映射的端口 7001是redis server使用，17001是集群之间节点通信使用，都必须开放映射，如果不指定17001端口映射的话，创建集群的时候节点之间不能通信，集群会创建失败
+      - "7001:7001"
+      - "17001:17001"
+    volumes:  # 映射的容器卷
+      - "./redis-cluster/redis-6381/config/redis.conf:/etc/redis/redis.conf"  # `redis.conf`文件内容`http://download.redis.io/redis-stable/redis.conf`
+      - "./redis-cluster/redis-6381/data:/data"
+    command: redis-server /etc/redis/redis.conf
+    networks:  # 指定使用网络插件名称
+      - redis-net
+
+  redis-node2:
+    image: registry.cn-hangzhou.aliyuncs.com/zhengqing/redis:7.0.5                   # 镜像'redis:7.0.5'
+    container_name: redis-node2
+    ports:
+      - "7002:7002"
+      - "17002:17002"
+    volumes:
+      - "./redis-cluster/redis-6382/config/redis.conf:/etc/redis/redis.conf"  # `redis.conf`文件内容`http://download.redis.io/redis-stable/redis.conf`
+      - "./redis-cluster/redis-6382/data:/data"
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      - redis-net
+
+  redis-node3:
+    image: registry.cn-hangzhou.aliyuncs.com/zhengqing/redis:7.0.5                   # 镜像'redis:7.0.5'
+    container_name: redis-node3
+    ports:
+      - "7003:7003"
+      - "17003:17003"
+    volumes:
+      - "./redis-cluster/redis-6383/config/redis.conf:/etc/redis/redis.conf"  # `redis.conf`文件内容`http://download.redis.io/redis-stable/redis.conf`
+      - "./redis-cluster/redis-6383/data:/data"
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      - redis-net
+
+  redis-node4:
+    image: registry.cn-hangzhou.aliyuncs.com/zhengqing/redis:7.0.5                   # 镜像'redis:7.0.5'
+    container_name: redis-node4
+    ports:
+      - "7004:7004"
+      - "17004:17004"
+    volumes:
+      - "./redis-cluster/redis-6384/config/redis.conf:/etc/redis/redis.conf"  # `redis.conf`文件内容`http://download.redis.io/redis-stable/redis.conf`
+      - "./redis-cluster/redis-6384/data:/data"
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      - redis-net
+
+  redis-node5:
+    image: registry.cn-hangzhou.aliyuncs.com/zhengqing/redis:7.0.5                   # 镜像'redis:7.0.5'
+    container_name: redis-node5
+    ports:
+      - "7005:7005"
+      - "17005:17005"
+    volumes:
+      - "./redis-cluster/redis-6385/config/redis.conf:/etc/redis/redis.conf"  # `redis.conf`文件内容`http://download.redis.io/redis-stable/redis.conf`
+      - "./redis-cluster/redis-6385/data:/data"
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      - redis-net
+
+  redis-node6:
+    image: registry.cn-hangzhou.aliyuncs.com/zhengqing/redis:7.0.5                   # 镜像'redis:7.0.5'
+    container_name: redis-node6
+    ports:
+      - "7006:7006"
+      - "17006:17006"
+    volumes:
+      - "./redis-cluster/redis-6386/config/redis.conf:/etc/redis/redis.conf"  # `redis.conf`文件内容`http://download.redis.io/redis-stable/redis.conf`
+      - "./redis-cluster/redis-6386/data:/data"
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      - redis-net
+
+
+
+networks:
+  redis-net:
