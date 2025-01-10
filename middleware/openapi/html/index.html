@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ReDoc</title>
+
+    <!-- 引入本地 CSS 文件 -->
+    <link rel="icon" href="favicon.png" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        redoc {
+            display: block;
+        }
+
+        /* 美化文件列表容器 */
+        #file-list {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 标题样式 */
+        #file-list h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        /* 搜索框样式 */
+        #search-box {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        /* 文件列表样式 */
+        #file-list-items {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* 文件列表项样式 */
+        #file-list-items li {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 文件链接样式 */
+        #file-list-items li a {
+            text-decoration: none;
+            color: #007BFF;
+            font-size: 16px;
+            display: block;
+        }
+
+        /* 鼠标悬停效果 */
+        #file-list-items li:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* 点击效果 */
+        #file-list-items li a:active {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<!--文档列表-->
+<div id="file-list">
+    <h2>API 文档列表</h2>
+    <input type="text" id="search-box" placeholder="搜索文件...">
+    <ul id="file-list-items">
+        <!-- 文件列表将动态填充在这里 -->
+    </ul>
+</div>
+
+<!-- ReDoc 容器 -->
+<div id="redoc-container"></div>
+
+<script src="%BASE_PATH%redoc.standalone.js"></script>
+
+<script>
+    // 文件列表数据
+    let files = [];
+
+    // Function to render the file list
+    function renderFileList(filteredFiles) {
+        const fileListContainer = document.getElementById('file-list-items');
+        fileListContainer.innerHTML = filteredFiles.map(file => `
+                <li><a href="#" onclick="loadRdoc('${file}')">${file}</a></li>
+            `).join('');
+    }
+
+    // Function to load ReDoc
+    function loadRdoc(file) {
+        // 移除文件列表容器
+        const fileListContainer = document.getElementById('file-list');
+        if (fileListContainer) {
+            fileListContainer.remove();
+        }
+
+        // 使用 Redoc.init 方法渲染文档
+        Redoc.init('apifiles/'+file, {}, document.getElementById('redoc-container'));
+    }
+
+    // Function to fetch the list of files
+    async function fetchFileList() {
+        try {
+            const response = await fetch('/apifiles');
+            const text = await response.text();
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(text, 'text/html');
+            const links = htmlDoc.querySelectorAll('a');
+
+            files = [];
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href.endsWith('.yaml') || href.endsWith('.json')) {
+                    const decodedFileName = decodeURIComponent(href);
+                    files.push(decodedFileName);
+                }
+            });
+            console.log(files);
+            return files;
+        } catch (error) {
+            console.error('Failed to fetch file list:', error);
+            return [];
+        }
+    }
+
+    // Function to filter files based on search keyword
+    function filterFiles(keyword) {
+        const filteredFiles = files.filter(file =>
+            file.toLowerCase().includes(keyword.toLowerCase())
+        );
+        renderFileList(filteredFiles);
+    }
+
+    // Initialize the page
+    async function init() {
+        await fetchFileList();
+        renderFileList(files);
+
+        // Add event listener for search box
+        const searchBox = document.getElementById('search-box');
+        searchBox.addEventListener('input', (event) => {
+            filterFiles(event.target.value);
+        });
+    }
+
+    // Start the initialization
+    init();
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+definitions:
+  fileInfo.FileSyncInfo:
+    properties:
+      businessType:
+        description: 文件对应的业务类型
+        type: string
+      createdAt:
+        description: 创建时间
+        type: integer
+      fileMd5:
+        description: 文件md5
+        type: string
+      fileName:
+        description: 文件名
+        type: string
+      filePath:
+        description: 文件路径
+        type: string
+      fileSize:
+        description: 文件大小
+        type: integer
+      id:
+        description: 文件id
+        type: string
+      lastModifyTime:
+        description: 文件最后修改时间
+        type: string
+      reason:
+        description: 失败原因
+        type: string
+      status:
+        description: 文件同步状态
+        type: integer
+      statusDesc:
+        description: 文件同步状态描述
+        type: string
+      updatedAt:
+        description: 更新时间
+        type: integer
+    type: object
+  fileInfo.GetFileSyncListResp:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/fileInfo.FileSyncInfo'
+        type: array
+      total:
+        type: integer
+    type: object
+host: xxx
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server Petstore server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: 文件同步服务api文档
+  version: "1.0"
+paths:
+  /api/v1/getFileSyncList:
+    get:
+      parameters:
+      - description: 文件名称
+        in: query
+        name: fileName
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      - description: 页码
+        in: query
+        name: pageNo
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/fileInfo.GetFileSyncListResp'
+      summary: 获取文件同步列表
+swagger: "2.0"
