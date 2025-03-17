@@ -94,9 +94,7 @@
 </div>
 
 <!-- ReDoc 容器 -->
-<div id="redoc-container"></div>
 
-<script src="%BASE_PATH%redoc.standalone.js"></script>
 
 <script>
     // 文件列表数据
@@ -106,21 +104,12 @@
     function renderFileList(filteredFiles) {
         const fileListContainer = document.getElementById('file-list-items');
         fileListContainer.innerHTML = filteredFiles.map(file => `
-                <li><a href="#" onclick="loadRdoc('${file}')">${file}</a></li>
+               <!--<li><a href="./swagger.html?file=${file}" onclick="loadRdoc('${file}')">${file}</a></li>-->
+                <li><a href="./swagger.html?file=${file}">${file}</a></li>
             `).join('');
     }
 
-    // Function to load ReDoc
-    function loadRdoc(file) {
-        // 移除文件列表容器
-        const fileListContainer = document.getElementById('file-list');
-        if (fileListContainer) {
-            fileListContainer.remove();
-        }
 
-        // 使用 Redoc.init 方法渲染文档
-        Redoc.init('apifiles/'+file, {}, document.getElementById('redoc-container'));
-    }
 
     // Function to fetch the list of files
     async function fetchFileList() {
