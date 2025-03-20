@@ -1,0 +1,4 @@
+{"level":"info","time":"2025-02-09-23:51:02","caller":"E:/demoproject/zlog/zap_config_test.go:91","msg":"level info"}
+{"level":"info","time":"2025-02-09-23:51:02","caller":"E:/demoproject/zlog/zap_config_test.go:91","msg":"level info"}
+{"level":"info","time":"2025-02-09-23:51:02","caller":"E:/demoproject/zlog/zap_config_test.go:91","msg":"level info"}
+{"level":"info","time":"2025-02-09-23:51:02","caller":"E:/demoproject/zlog/zap_config_test.go:91","msg":"level info"}
