@@ -1,1 +1,3 @@
 .idea
+middleware/elk/elk/elasticsearch/logs
+middleware/elk/elk/logstash/data/
