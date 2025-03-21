@@ -30,3 +30,35 @@ elasticsearch-setup-passwords interactive
 ```
 
 ![elk_elasticsearch_set_password](images/elk_elasticsearch_set_password.png)
+
+
+
+
+
+elk 关联iml，推荐新索引手动创建
+
+```json
+PUT _index_template/logs_account
+{
+  "index_patterns": ["logs_account-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1,
+      "index.lifecycle.name": "logs_policy",
+      "index.lifecycle.rollover_alias": "logs_account"
+    }
+  }
+}
+
+
+PUT logs_account-000001
+{
+  "aliases": {
+    "logs_account": {
+      "is_write_index": true  
+    }
+  }
+}
+```
+
