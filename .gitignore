@@ -6,3 +6,6 @@ middleware/mongodb/replset/mongo1/data
 middleware/mongodb/replset/mongo2/data
 middleware/mongodb/replset/mongo3/data
 middleware/grafana_promtail_loki/grafana/data/grafana.db
+middleware/mongodb/replset/mongo1/logs/mongod.log
+middleware/mongodb/replset/mongo2/logs/mongod.log
+middleware/mongodb/replset/mongo3/logs/mongod.log
