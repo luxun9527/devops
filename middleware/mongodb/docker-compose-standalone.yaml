@@ -1,0 +1,21 @@
+version: "3.7"
+services:
+  mongo-standalone:
+    image: mongo:latest
+    container_name: mongo-standalone
+    ports:
+      - "27017:27017"
+    command: mongod --bind_ip 0.0.0.0 -f /data/configdb/mongod.conf
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - "./standalone/conf/:/data/configdb"
+      - "./standalone/data/:/data/db"
+      - "./standalone/logs/:/data/log"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+

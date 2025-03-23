@@ -1,0 +1,3 @@
+positions:
+  /var/logs/app.log: "10001"
+  /var/logs/test.log: "18030"

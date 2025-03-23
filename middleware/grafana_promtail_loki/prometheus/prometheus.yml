@@ -1,0 +1,29 @@
+# 可参考 https://prometheus.io/docs/prometheus/latest/getting_started
+global:
+  scrape_interval: 10s
+  scrape_timeout: 10s
+  evaluation_interval: 10m
+scrape_configs:
+  # springboot项目
+
+
+  # prometheus
+  - job_name: prometheus
+    static_configs:
+      - targets: ['prometheus:9090']
+        labels:
+          instance: prometheus
+
+  # 采集node exporter监控数据，即linux
+  - job_name: linux
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          instance: localhost
+  - job_name: 'mongodb_exporter'
+    static_configs:
+      - targets: [ '192.168.2.200:9216' ]
+
+  - job_name: 'go-zero-demo'
+    static_configs:
+      - targets: [ '192.168.2.109:9091' ]

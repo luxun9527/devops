@@ -1,0 +1,32 @@
+server:
+  http_listen_port: 9080  # 必须为非零端口
+  grpc_listen_port: 0
+
+positions:
+  filename: /etc/promtail/positions.yaml  # 游标记录上一次同步位置
+  sync_period: 10s  # 10秒钟同步一次
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push  # 注意：Loki 2.0+ 使用 /loki/api/v1/push
+    batchsize: 1048576  # 每批次最大字节数（默认 1MB）
+scrape_configs:
+  - job_name: test-log
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          app: varlogs
+          __path__: /var/logs/*.log  # 修正路径格式
+    pipeline_stages:
+      - json: # 解析 JSON 格式的日志
+          expressions:
+            level: level  # 提取 level 字段
+            time: time    # 提取 time 字段
+            caller: caller  # 提取 caller 字段
+            msg: msg      # 提取 msg 字段
+      - drop:  # 过滤空行
+          expression: '^$'
+      - labels:  # 将提取的字段作为标签
+          level: ""
+          caller: ""

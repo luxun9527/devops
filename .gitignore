@@ -2,3 +2,7 @@
 middleware/elk/elk/elasticsearch/logs
 middleware/elk/elk/elasticsearch/data
 middleware/elk/elk/logstash/data/
+middleware/mongodb/replset/mongo1/data
+middleware/mongodb/replset/mongo2/data
+middleware/mongodb/replset/mongo3/data
+middleware/grafana_promtail_loki/grafana/data/grafana.db

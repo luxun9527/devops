@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+
+  mongodb_exporter:
+    image: docker.zhai.cm/percona/mongodb_exporter:0.39
+    container_name: mongodb_exporter
+    #command: ["--mongodb.direct-connect=false" ,"--mongodb.collstats-colls=test.users","--log.level=info","--discovering-mode=true","--collector.replicasetstatus=true","--collector.dbstats=true"]
+    command: ["--collect-all","--mongodb.direct-connect=false"]
+
+    ports:
+      - "9216:9216"
+    environment:
+      MONGODB_URI: "mongodb://root:example@192.168.2.200:30011,192.168.2.200:30012,192.168.2.200:30013/admin?replicaSet=rs0"
+
+    networks:
+      - mongodb_network
+
+volumes:
+  mongodb_data:
+
+networks:
+  mongodb_network:
